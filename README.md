@@ -11,10 +11,7 @@ Documentation for Sonatino can be found [here](https://sonatino.com/docs).
 | Name                                                  | Description                                                        |
 | ----------------------------------------------------- | ------------------------------------------------------------------ |
 | [audio-playback-example](audio-playback-example/)     | Demonstrates how to play an MP3 file                               |
-| ----------------------------------------------------- | ------------------------------------------------------------------ |
 | [audio-processing-example](audio-processing-example/) | Demonstrates real-time audio processing with a basic reverb effect |
-
----
 
 ## Running The Examples
 
