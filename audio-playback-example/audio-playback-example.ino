@@ -29,12 +29,14 @@
 #define MICROSD_SPI_SCK_PIN   42
 #define MICROSD_SPI_MOSI_PIN  43
 #define MICROSD_SPI_MISO_PIN  44
+#define BLUE_LED_PIN          45
 
 
 AudioGeneratorMP3a *mp3;
 AudioFileSourcePROGMEM *file;
 AudioFileSourceSD *sd_file;
 AudioOutputI2S *out;
+unsigned long last_led_blink = 0;
 
 
 void playMP3() {
@@ -52,6 +54,8 @@ void setup() {
   // "USB CDC On Boot" must be enabled
   Serial.begin(115200);
   WiFi.mode(WIFI_OFF);
+
+  pinMode(BLUE_LED_PIN, OUTPUT);
 
   if (USE_MICROSD_CARD) {
     // Set up access to microSD card
@@ -80,7 +84,15 @@ void loop() {
     if (!mp3->loop()) {
       mp3->stop();
       Serial.println("Done");
+      
+      // Play the file again
       playMP3();
     }
-  } 
+  }
+
+  // Blink the blue LED
+  if (millis() - last_led_blink > 1000) {
+    last_led_blink = millis();
+    digitalWrite(BLUE_LED_PIN, !digitalRead(BLUE_LED_PIN));
+  }
 }
