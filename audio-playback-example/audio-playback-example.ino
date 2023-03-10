@@ -1,10 +1,10 @@
 #include <WiFi.h>
-#include "AudioFileSourcePROGMEM.h"
-#include "AudioFileSourceSD.h"
-#include "AudioGeneratorMP3a.h"
-#include "AudioOutputI2S.h"
-#include "SPI.h"
-#include "SD.h"
+#include <AudioFileSourcePROGMEM.h>
+#include <AudioFileSourceSD.h>
+#include <AudioGeneratorMP3a.h>
+#include <AudioOutputI2S.h>
+#include <SPI.h>
+#include <SD.h>
 
 
 // MP3 example excerpt from:
@@ -35,17 +35,17 @@
 AudioGeneratorMP3a *mp3;
 AudioFileSourcePROGMEM *file;
 AudioFileSourceSD *sd_file;
-AudioOutputI2S *out;
+AudioOutputI2S *dac;
 unsigned long last_led_blink = 0;
 
 
 void playMP3() {
   if (USE_MICROSD_CARD) {
     sd_file = new AudioFileSourceSD(FILE_PATH);
-    mp3->begin(sd_file, out);
+    mp3->begin(sd_file, dac);
   } else {
     file = new AudioFileSourcePROGMEM(example_data, sizeof(example_data));
-    mp3->begin(file, out);
+    mp3->begin(file, dac);
   }
   Serial.println("Playing MP3...");
 }
@@ -68,11 +68,11 @@ void setup() {
     }
   }
 
-  out = new AudioOutputI2S();
-  out->SetPinout(DAC_BCLK_PIN, DAC_LRCLK_PIN, DAC_DATA_PIN);
+  dac = new AudioOutputI2S();
+  dac->SetPinout(DAC_BCLK_PIN, DAC_LRCLK_PIN, DAC_DATA_PIN);
 
   // Output can be very loud, so we're setting the gain less than 1
-  out->SetGain(0.1);
+  dac->SetGain(0.1);
   mp3 = new AudioGeneratorMP3a();
   playMP3();
 

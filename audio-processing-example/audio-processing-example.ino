@@ -1,6 +1,6 @@
 #include <WiFi.h>
 #include <driver/i2s.h>
-#include "AudioOutputI2S.h"
+#include <AudioOutputI2S.h>
 
 #define VERBLIB_IMPLEMENTATION
 #include "verblib.h"
