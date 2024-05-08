@@ -1,10 +1,10 @@
 # Sonatino Examples
+## (For previous revisions: 2.x.x)
+
 
 This repository contains sample code for the [Sonatino](https://sonatino.com) audio development board.
 
 Documentation for Sonatino can be found [here](https://sonatino.com/docs).
-
-**Note**: For board revisions prior to 3.x.x, use the examples in the [v2.x.x](v2.x.x/) folder. Your revision number can be found on the bottom side of the board.
 
 ---
 
