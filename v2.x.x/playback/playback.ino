@@ -29,7 +29,7 @@
 #define MICROSD_SPI_SCK_PIN   42
 #define MICROSD_SPI_MOSI_PIN  43
 #define MICROSD_SPI_MISO_PIN  44
-#define RGB_LED_PIN           45
+#define BLUE_LED_PIN          45
 
 
 AudioGeneratorMP3a *mp3;
@@ -37,14 +37,6 @@ AudioFileSourcePROGMEM *file;
 AudioFileSourceSD *sd_file;
 AudioOutputI2S *dac;
 unsigned long last_led_blink = 0;
-int led_color_index = 0;
-int colors[][3] = {
-    {255, 0, 0},    // Red
-    {0, 255, 0},    // Green
-    {0, 0, 255},    // Blue
-    {255, 255, 0},  // Yellow
-    {255, 0, 255}   // Magenta
-};
 
 
 void playMP3() {
@@ -63,7 +55,7 @@ void setup() {
   Serial.begin(115200);
   WiFi.mode(WIFI_OFF);
 
-  pinMode(RGB_LED_PIN, OUTPUT);
+  pinMode(BLUE_LED_PIN, OUTPUT);
 
   if (USE_MICROSD_CARD) {
     // Set up access to microSD card
@@ -98,17 +90,9 @@ void loop() {
     }
   }
 
-  // Cycle through some LED colors
+  // Blink the blue LED
   if (millis() - last_led_blink > 1000) {
     last_led_blink = millis();
-
-    neopixelWrite(
-      RGB_LED_PIN,
-      colors[led_color_index][0],
-      colors[led_color_index][1],
-      colors[led_color_index][2]
-    );
-
-    led_color_index = (led_color_index + 1) % (sizeof(colors) / sizeof(colors[0]));
+    digitalWrite(BLUE_LED_PIN, !digitalRead(BLUE_LED_PIN));
   }
 }

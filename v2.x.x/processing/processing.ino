@@ -32,6 +32,42 @@ float filter_buffer[BUFFER_SAMPLES * CHANNELS];
 verblib rv;
 
 
+void processAudio(void *pvParameters) {
+  size_t bytes_read = 0;
+  float input_sample;
+  int16_t out_sample[2];
+
+  while (1) {
+    i2s_read(I2S_NUM_1, input_buffer, BUFFER_SAMPLES * sizeof(int16_t),
+             &bytes_read, portMAX_DELAY);
+
+    if (bytes_read > 0) {
+      // Read mono samples and copy into the stereo filter_buffer
+      for (uint32_t i = 0; i < bytes_read / sizeof(int16_t); i++) {
+        input_sample =
+            (float)input_buffer[i] / (float)std::numeric_limits<int16_t>::max();
+
+        filter_buffer[i * CHANNELS] = input_sample;
+        filter_buffer[i * CHANNELS + 1] = input_sample;
+      }
+
+      if (USE_REVERB) {
+        verblib_process(&rv, filter_buffer, filter_buffer, bytes_read / 2);
+      }
+
+      // Send samples to output
+      for (uint32_t i = 0; i < bytes_read / sizeof(int16_t) * CHANNELS;
+           i += CHANNELS) {
+        out_sample[0] =
+            filter_buffer[i] * (float)std::numeric_limits<int16_t>::max();
+        out_sample[1] =
+            filter_buffer[i + 1] * (float)std::numeric_limits<int16_t>::max();
+        dac->ConsumeSample(out_sample);
+      }
+    }
+  }
+}
+
 void setup() {
   // "USB CDC On Boot" must be enabled
   Serial.begin(115200);
@@ -83,34 +119,10 @@ void setup() {
     }
   }
 
+  // Start audio processing task
+  xTaskCreatePinnedToCore(processAudio, "processAudio", 2048, NULL, 1, NULL, 0);
+
   Serial.println("Ready");
 }
 
-void loop() {
-  size_t bytes_read = 0;
-  i2s_read(I2S_NUM_1, input_buffer, BUFFER_SAMPLES * sizeof(int16_t), &bytes_read, portMAX_DELAY);
-
-  if (bytes_read > 0) {
-    // Read mono samples and copy into the stereo filter_buffer
-    for (uint32_t i = 0; i < bytes_read / sizeof(int16_t); i++) {
-      float input_sample = (float)input_buffer[i] / (float)std::numeric_limits<int16_t>::max();
-
-      filter_buffer[i * CHANNELS] = input_sample;
-      filter_buffer[i * CHANNELS + 1] = input_sample;
-    }
-
-    if (USE_REVERB) {
-      verblib_process(&rv, filter_buffer, filter_buffer, bytes_read / 2);
-    }
-
-    // Send samples to output
-    for (uint32_t i = 0; i < bytes_read / sizeof(int16_t) * CHANNELS; i += CHANNELS) {
-      int16_t out_sample[2] = {
-        filter_buffer[i] * (float)std::numeric_limits<int16_t>::max(),
-        filter_buffer[i + 1] * (float)std::numeric_limits<int16_t>::max()
-      };
-      dac->ConsumeSample(out_sample);
-    }
-
-  }
-}
+void loop() {}
